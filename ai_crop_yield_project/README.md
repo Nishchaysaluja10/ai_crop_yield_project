@@ -106,7 +106,7 @@ Scaling: Nationwide rollout, partnerships with government and agri-tech firms, c
 
 Setup & Usage
 Clone the repository:
-git clone https://github.com/your-username/cropai.git
+git clone https://github.com/your-username/cropai.git 
 
 Install dependencies:
 npm install
