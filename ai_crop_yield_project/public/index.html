@@ -1,43 +1,795 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CropAI - Smart Agricultural Intelligence Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <h2>🌾 CropAI</h2>
+                </div>
+                <div class="nav-links">
+                    <select class="language-selector" id="globalLanguageSelect" onchange="changeGlobalLanguage()">
+                        <option value="en">English</option>
+                        <option value="hi">हिंदी</option>
+                        <option value="or">ଓଡ଼ିଆ</option>
+                    </select>
+                    <a href="#dashboard" onclick="showPage('dashboard')" data-translate="nav.dashboard">Dashboard</a>
+                    <a href="#yield-prediction" onclick="showPage('yield-prediction')" data-translate="nav.yield">Yield Prediction</a>
+                    <a href="#recommendations" onclick="showPage('recommendations')" data-translate="nav.recommendations">Recommendations</a>
+                    <a href="#disease-detector" onclick="showPage('disease-detector')" data-translate="nav.disease">Disease Detector</a>
+                    <a href="#weather" onclick="showPage('weather')" data-translate="nav.weather">Weather</a>
+                    <a href="#market" onclick="showPage('market')" data-translate="nav.market">Market</a>
+                    <a href="#schemes" onclick="showPage('schemes')" data-translate="nav.schemes">Gov Schemes</a>
+                    <a href="#community" onclick="showPage('community')" data-translate="nav.community">Community</a>
+                </div>
+                <div class="nav-mobile-toggle" onclick="toggleMobileNav()">☰</div>
+            </div>
+        </div>
+    </nav>
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Smart AI-Powered Agricultural Intelligence</h1>
+                <p class="hero-description">Revolutionize farming with AI predictions, disease detection, weather intelligence, and multilingual support</p>
+                <div class="hero-buttons">
+                    <button class="btn btn--primary btn--lg" onclick="showPage('yield-prediction')">Start Yield Prediction</button>
+                    <button class="btn btn--outline btn--lg" onclick="openChatbot()">Chat with AI Assistant</button>
+                </div>
+            </div>
+        </div>
+    </section>
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+    <!-- Dashboard Page -->
+    <div class="page" id="dashboard-page">
+        <div class="container">
+            <h2 class="page-title">Agricultural Intelligence Dashboard</h2>
+            
+            <!-- Key Metrics -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value" id="totalFarmers">45,231</div>
+                    <div class="metric-label">Active Farmers</div>
+                    <div class="metric-change">+12% this month</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="avgYieldIncrease">18.5%</div>
+                    <div class="metric-label">Avg Yield Increase</div>
+                    <div class="metric-change">Using CropAI</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="diseasesDetected">2,847</div>
+                    <div class="metric-label">Diseases Detected</div>
+                    <div class="metric-change">This month</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="totalSavings">₹24.6L</div>
+                    <div class="metric-label">Farmer Savings</div>
+                    <div class="metric-change">Last 30 days</div>
+                </div>
+            </div>
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+            <!-- Regional Performance Chart -->
+            <div class="dashboard-section">
+                <h3>Regional Crop Performance Analysis</h3>
+                <div class="chart-container" style="position: relative; height: 400px;">
+                    <canvas id="regionalYieldChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Weather Overview -->
+            <div class="dashboard-section">
+                <h3>Current Weather Conditions</h3>
+                <div class="weather-overview-grid">
+                    <div class="weather-card">
+                        <div class="weather-icon">⛅</div>
+                        <div class="weather-details">
+                            <div class="weather-temp">28°C</div>
+                            <div class="weather-location">Bhubaneswar</div>
+                            <div class="weather-condition">Partly Cloudy</div>
+                        </div>
+                    </div>
+                    <div class="weather-stats-grid">
+                        <div class="weather-stat">
+                            <span class="stat-label">Humidity</span>
+                            <span class="stat-value">78%</span>
+                        </div>
+                        <div class="weather-stat">
+                            <span class="stat-label">Rainfall</span>
+                            <span class="stat-value">20%</span>
+                        </div>
+                        <div class="weather-stat">
+                            <span class="stat-label">Wind Speed</span>
+                            <span class="stat-value">15 km/h</span>
+                        </div>
+                        <div class="weather-stat">
+                            <span class="stat-label">UV Index</span>
+                            <span class="stat-value">7 (High)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yield Prediction Page -->
+    <div class="page hidden" id="yield-prediction-page">
+        <div class="container">
+            <h2 class="page-title">AI Yield Prediction Calculator</h2>
+            
+            <div class="yield-calculator-advanced">
+                <div class="calc-form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Select City</label>
+                        <select class="form-control" id="citySelect">
+                            <option value="Bhubaneswar">Bhubaneswar, Odisha</option>
+                            <option value="Mumbai">Mumbai, Maharashtra</option>
+                            <option value="Delhi">Delhi</option>
+                            <option value="Chennai">Chennai, Tamil Nadu</option>
+                            <option value="Kolkata">Kolkata, West Bengal</option>
+                            <option value="Bangalore">Bangalore, Karnataka</option>
+                            <option value="Hyderabad">Hyderabad, Telangana</option>
+                            <option value="Pune">Pune, Maharashtra</option>
+                            <option value="Ahmedabad">Ahmedabad, Gujarat</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Crop Type</label>
+                        <select class="form-control" id="cropType">
+                            <option value="Rice">Rice (धान / ଧାନ)</option>
+                            <option value="Wheat">Wheat (गेहूं / ଗହମ)</option>
+                            <option value="Maize">Maize (मक्का / ମକା)</option>
+                            <option value="Cotton">Cotton (कपास / କପା)</option>
+                            <option value="Sugarcane">Sugarcane (गन्ना / ଇଖୁ)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Field Size (acres)</label>
+                        <input type="number" class="form-control" id="fieldSize" value="5" min="0.1" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Soil Type</label>
+                        <select class="form-control" id="soilType">
+                            <option value="Alluvial">Alluvial</option>
+                            <option value="Black Cotton">Black Cotton</option>
+                            <option value="Red Laterite">Red Laterite</option>
+                            <option value="Sandy">Sandy</option>
+                            <option value="Clay">Clay</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Irrigation Method</label>
+                        <select class="form-control" id="irrigationType">
+                            <option value="Drip">Drip Irrigation</option>
+                            <option value="Sprinkler">Sprinkler</option>
+                            <option value="Flood">Flood Irrigation</option>
+                            <option value="Rain-fed">Rain-fed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Previous Year Yield (quintals)</label>
+                        <input type="number" class="form-control" id="previousYield" value="25" min="0" step="0.1">
+                    </div>
+                </div>
+                
+                <button class="btn btn--primary btn--lg btn--full-width" onclick="calculateAdvancedYield()">
+                    <span class="btn-text">Calculate AI Prediction</span>
+                    <div class="loading-spinner hidden"></div>
+                </button>
+                
+                <div class="yield-results-advanced hidden" id="yieldResultsAdvanced">
+                    <div class="results-header">
+                        <h3>AI Prediction Results</h3>
+                        <div class="confidence-display">
+                            <span>Confidence: </span>
+                            <span id="predictionConfidence" class="confidence-value">94%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="results-grid-advanced">
+                        <div class="result-card-large">
+                            <div class="result-title">Predicted Yield</div>
+                            <div class="result-value-large" id="predictedYield">0 quintals</div>
+                            <div class="result-subtitle">For your <span id="resultFieldSize">5</span> acre field</div>
+                        </div>
+                        <div class="result-card-large">
+                            <div class="result-title">Productivity Increase</div>
+                            <div class="result-value-large productivity-increase" id="productivityIncrease">+18%</div>
+                            <div class="result-subtitle">Compared to traditional methods</div>
+                        </div>
+                        <div class="result-card-large">
+                            <div class="result-title">Expected Revenue</div>
+                            <div class="result-value-large" id="expectedRevenue">₹0</div>
+                            <div class="result-subtitle">Additional income: <span id="additionalIncome">₹15,000</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="weather-yield-correlation">
+                        <h4>Weather Impact Analysis</h4>
+                        <div class="chart-container" style="position: relative; height: 300px;">
+                            <canvas id="weatherYieldChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations Page -->
+    <div class="page hidden" id="recommendations-page">
+        <div class="container">
+            <h2 class="page-title">Personalized Crop Recommendations</h2>
+            
+            <div class="recommendations-dashboard">
+                <div class="recommendation-filters">
+                    <select class="form-control" id="recCropType" onchange="updateRecommendations()">
+                        <option value="Rice">Rice</option>
+                        <option value="Wheat">Wheat</option>
+                        <option value="Maize">Maize</option>
+                        <option value="Cotton">Cotton</option>
+                    </select>
+                    <select class="form-control" id="recLocation" onchange="updateRecommendations()">
+                        <option value="Bhubaneswar">Bhubaneswar</option>
+                        <option value="Mumbai">Mumbai</option>
+                        <option value="Delhi">Delhi</option>
+                        <option value="Chennai">Chennai</option>
+                    </select>
+                    <select class="form-control" id="recSeason" onchange="updateRecommendations()">
+                        <option value="Kharif">Kharif (Monsoon)</option>
+                        <option value="Rabi">Rabi (Winter)</option>
+                        <option value="Zaid">Zaid (Summer)</option>
+                    </select>
+                </div>
+                
+                <div class="recommendations-content" id="recommendationsContent">
+                    <div class="recommendation-section">
+                        <h3>🌱 Cultivation Recommendations</h3>
+                        <div class="rec-card">
+                            <h4>Optimal Planting Time</h4>
+                            <p>For Rice in Bhubaneswar during Kharif season, plant between June 15-July 15 for maximum yield potential.</p>
+                            <div class="rec-impact">Expected Impact: <span class="impact-positive">+12% yield</span></div>
+                        </div>
+                        <div class="rec-card">
+                            <h4>Variety Selection</h4>
+                            <p>Recommended varieties: Swarna, MTU-1010, Naveen. These are suited for local climate conditions.</p>
+                            <div class="rec-impact">Expected Impact: <span class="impact-positive">+8% disease resistance</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-section">
+                        <h3>💧 Irrigation Schedule</h3>
+                        <div class="irrigation-timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-date">Week 1-2</div>
+                                <div class="timeline-content">
+                                    <h5>Transplanting Stage</h5>
+                                    <p>Maintain 2-3 cm water depth. Apply water every 2 days.</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-date">Week 3-8</div>
+                                <div class="timeline-content">
+                                    <h5>Vegetative Stage</h5>
+                                    <p>Maintain 5-7 cm water depth. Check water level daily.</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-date">Week 9-12</div>
+                                <div class="timeline-content">
+                                    <h5>Reproductive Stage</h5>
+                                    <p>Maintain 2-5 cm water depth. Critical period - don't let field dry.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-section">
+                        <h3>🧪 Fertilizer Management</h3>
+                        <div class="fertilizer-schedule">
+                            <div class="fertilizer-stage">
+                                <h4>Basal Application (Day 0)</h4>
+                                <div class="fertilizer-details">
+                                    <span class="fertilizer-amount">120 kg/ha Nitrogen</span>
+                                    <span class="fertilizer-type">Apply 50% at transplanting</span>
+                                </div>
+                            </div>
+                            <div class="fertilizer-stage">
+                                <h4>Top Dressing 1 (Day 20-25)</h4>
+                                <div class="fertilizer-details">
+                                    <span class="fertilizer-amount">60 kg/ha Nitrogen</span>
+                                    <span class="fertilizer-type">Apply during tillering stage</span>
+                                </div>
+                            </div>
+                            <div class="fertilizer-stage">
+                                <h4>Top Dressing 2 (Day 45-50)</h4>
+                                <div class="fertilizer-details">
+                                    <span class="fertilizer-amount">40 kg/ha Nitrogen</span>
+                                    <span class="fertilizer-type">Apply before panicle initiation</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-section">
+                        <h3>🛡️ Pest & Disease Management</h3>
+                        <div class="pest-management">
+                            <div class="pest-alert">
+                                <div class="pest-severity high">HIGH RISK</div>
+                                <h4>Brown Planthopper</h4>
+                                <p>Monitor population during August-September. Use yellow sticky traps for early detection.</p>
+                                <div class="pest-action">
+                                    <strong>Action:</strong> Apply Imidacloprid 17.8% SL @ 0.3ml/L if population exceeds threshold
+                                </div>
+                            </div>
+                            <div class="pest-alert">
+                                <div class="pest-severity medium">MEDIUM RISK</div>
+                                <h4>Bacterial Leaf Blight</h4>
+                                <p>Common during high humidity periods. Symptoms include water-soaked lesions.</p>
+                                <div class="pest-action">
+                                    <strong>Prevention:</strong> Use resistant varieties, avoid mechanical injury during operations
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disease Detector Page -->
+    <div class="page hidden" id="disease-detector-page">
+        <div class="container">
+            <h2 class="page-title">AI Disease Detection & Diagnosis</h2>
+            
+            <div class="disease-detector-advanced">
+                <div class="detector-interface">
+                    <div class="upload-section">
+                        <div class="upload-area" id="uploadArea" onclick="simulateImageUpload()">
+                            <div class="upload-icon">📷</div>
+                            <h3>Upload Crop Image</h3>
+                            <p>Take a clear photo of affected leaves/plants or try sample images below</p>
+                            <div class="upload-formats">Supports: JPG, PNG, HEIC</div>
+                        </div>
+                        
+                        <div class="sample-images-grid">
+                            <div class="sample-image" onclick="analyzeSampleDisease(0)">
+                                <div class="sample-icon">🌾</div>
+                                <div class="sample-label">Rice Blast</div>
+                            </div>
+                            <div class="sample-image" onclick="analyzeSampleDisease(1)">
+                                <div class="sample-icon">🌾</div>
+                                <div class="sample-label">Wheat Rust</div>
+                            </div>
+                            <div class="sample-image" onclick="analyzeSampleDisease(2)">
+                                <div class="sample-icon">🥔</div>
+                                <div class="sample-label">Potato Blight</div>
+                            </div>
+                            <div class="sample-image" onclick="analyzeSampleDisease(3)">
+                                <div class="sample-icon">🌿</div>
+                                <div class="sample-label">Healthy Plant</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detection-results hidden" id="detectionResults">
+                        <div class="analysis-progress" id="analysisProgress">
+                            <div class="progress-spinner"></div>
+                            <h3>AI Analysis in Progress</h3>
+                            <p id="analysisStatus">Processing image with deep learning models...</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="disease-diagnosis hidden" id="diseaseDiagnosis">
+                            <div class="diagnosis-header">
+                                <h3 id="diseaseTitle">Disease Detected</h3>
+                                <div class="confidence-badge" id="diseaseConfidenceScore">94%</div>
+                            </div>
+                            
+                            <div class="diagnosis-details">
+                                <div class="diagnosis-section">
+                                    <h4>🔍 Symptoms Identified</h4>
+                                    <ul id="symptomsIdentified">
+                                        <li>Brown spots with yellow halos on leaves</li>
+                                        <li>Wilting of younger leaves</li>
+                                        <li>Water-soaked lesions on leaf margins</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="diagnosis-section">
+                                    <h4>⚕️ Recommended Treatment</h4>
+                                    <div class="treatment-steps" id="treatmentSteps">
+                                        <div class="treatment-step immediate">
+                                            <div class="step-priority">IMMEDIATE</div>
+                                            <div class="step-content">
+                                                <h5>Remove infected plants</h5>
+                                                <p>Immediately remove and destroy affected plants to prevent spread</p>
+                                            </div>
+                                        </div>
+                                        <div class="treatment-step short-term">
+                                            <div class="step-priority">THIS WEEK</div>
+                                            <div class="step-content">
+                                                <h5>Apply fungicide spray</h5>
+                                                <p>Use Copper Oxychloride 50% WP @ 3g/L every 7-10 days</p>
+                                            </div>
+                                        </div>
+                                        <div class="treatment-step preventive">
+                                            <div class="step-priority">PREVENTION</div>
+                                            <div class="step-content">
+                                                <h5>Improve field drainage</h5>
+                                                <p>Ensure proper drainage to reduce humidity and disease spread</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="diagnosis-section">
+                                    <h4>📊 Economic Impact</h4>
+                                    <div class="impact-stats">
+                                        <div class="impact-stat">
+                                            <div class="impact-value">₹8,500</div>
+                                            <div class="impact-label">Potential Loss per Hectare</div>
+                                        </div>
+                                        <div class="impact-stat">
+                                            <div class="impact-value">85%</div>
+                                            <div class="impact-label">Treatment Success Rate</div>
+                                        </div>
+                                        <div class="impact-stat">
+                                            <div class="impact-value">7 days</div>
+                                            <div class="impact-label">Recovery Time</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weather Page -->
+    <div class="page hidden" id="weather-page">
+        <div class="container">
+            <h2 class="page-title">Comprehensive Weather Intelligence</h2>
+            
+            <div class="weather-dashboard">
+                <div class="weather-controls">
+                    <select class="form-control" id="weatherCitySelect" onchange="updateWeatherData()">
+                        <option value="Bhubaneswar">Bhubaneswar, Odisha</option>
+                        <option value="Mumbai">Mumbai, Maharashtra</option>
+                        <option value="Delhi">Delhi</option>
+                        <option value="Chennai">Chennai, Tamil Nadu</option>
+                        <option value="Kolkata">Kolkata, West Bengal</option>
+                        <option value="Bangalore">Bangalore, Karnataka</option>
+                        <option value="Hyderabad">Hyderabad, Telangana</option>
+                        <option value="Pune">Pune, Maharashtra</option>
+                        <option value="Ahmedabad">Ahmedabad, Gujarat</option>
+                    </select>
+                </div>
+                
+                <div class="weather-overview">
+                    <div class="current-weather-detailed">
+                        <div class="current-main">
+                            <div class="weather-icon-large">⛅</div>
+                            <div class="current-temp">28°C</div>
+                            <div class="current-condition">Partly Cloudy</div>
+                            <div class="current-location" id="currentWeatherLocation">Bhubaneswar, Odisha</div>
+                        </div>
+                        <div class="current-stats">
+                            <div class="weather-stat-detailed">
+                                <span class="stat-icon">💧</span>
+                                <span class="stat-label">Humidity</span>
+                                <span class="stat-value" id="currentHumidity">78%</span>
+                            </div>
+                            <div class="weather-stat-detailed">
+                                <span class="stat-icon">💨</span>
+                                <span class="stat-label">Wind Speed</span>
+                                <span class="stat-value" id="currentWind">15 km/h</span>
+                            </div>
+                            <div class="weather-stat-detailed">
+                                <span class="stat-icon">🌧️</span>
+                                <span class="stat-label">Rain Chance</span>
+                                <span class="stat-value" id="currentRain">20%</span>
+                            </div>
+                            <div class="weather-stat-detailed">
+                                <span class="stat-icon">☀️</span>
+                                <span class="stat-label">UV Index</span>
+                                <span class="stat-value" id="currentUV">7</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="weather-forecast-extended">
+                    <h3>14-Day Extended Forecast</h3>
+                    <div class="forecast-container">
+                        <div class="forecast-scroll" id="forecast14Day">
+                            <!-- 14-day forecast will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="weather-farming-alerts">
+                    <h3>Farming Advisory</h3>
+                    <div class="farming-alerts-list" id="farmingAlertsList">
+                        <div class="farming-alert warning">
+                            <div class="alert-icon">⚠️</div>
+                            <div class="alert-content">
+                                <h4>Heavy Rainfall Alert</h4>
+                                <p>Expected rainfall on Sept 19-20. Avoid pesticide spraying and field operations.</p>
+                                <div class="alert-validity">Valid until: Sept 21, 2025</div>
+                            </div>
+                        </div>
+                        <div class="farming-alert success">
+                            <div class="alert-icon">✅</div>
+                            <div class="alert-content">
+                                <h4>Optimal Conditions</h4>
+                                <p>Perfect weather for rice transplanting from Sept 22-25. Temperature and humidity ideal.</p>
+                                <div class="alert-validity">Valid: Sept 22-25, 2025</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="weather-charts">
+                    <h3>Weather Trends & Analysis</h3>
+                    <div class="chart-tabs">
+                        <button class="chart-tab-btn active" onclick="showWeatherChart('temperature')">Temperature</button>
+                        <button class="chart-tab-btn" onclick="showWeatherChart('rainfall')">Rainfall</button>
+                        <button class="chart-tab-btn" onclick="showWeatherChart('humidity')">Humidity</button>
+                    </div>
+                    <div class="chart-container" style="position: relative; height: 350px;">
+                        <canvas id="weatherTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Market Page -->
+    <div class="page hidden" id="market-page">
+        <div class="container">
+            <h2 class="page-title">Market Intelligence & Price Tracking</h2>
+            
+            <div class="market-dashboard">
+                <div class="price-overview">
+                    <div class="price-cards-grid" id="priceCardsGrid">
+                        <!-- Price cards will be populated here -->
+                    </div>
+                </div>
+                
+                <div class="market-analysis">
+                    <div class="price-trends">
+                        <h3>Price Trends (30 Days)</h3>
+                        <div class="chart-container" style="position: relative; height: 300px;">
+                            <canvas id="pricesTrendChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="market-insights">
+                        <h3>Market Insights</h3>
+                        <div class="insights-list">
+                            <div class="insight-item">
+                                <div class="insight-icon trend-up">📈</div>
+                                <div class="insight-content">
+                                    <h4>Rice Prices Rising</h4>
+                                    <p>Rice prices increased by 5.2% due to delayed monsoons in key growing regions.</p>
+                                    <div class="insight-recommendation">Consider selling stored rice stocks</div>
+                                </div>
+                            </div>
+                            <div class="insight-item">
+                                <div class="insight-icon trend-down">📉</div>
+                                <div class="insight-content">
+                                    <h4>Wheat Market Correction</h4>
+                                    <p>Wheat prices declined by 2.1% following government procurement completion.</p>
+                                    <div class="insight-recommendation">Good time for procurement for processing</div>
+                                </div>
+                            </div>
+                            <div class="insight-item">
+                                <div class="insight-icon stable">➡️</div>
+                                <div class="insight-content">
+                                    <h4>Cotton Demand Stable</h4>
+                                    <p>Cotton prices remain stable with steady export demand and good quality harvest.</p>
+                                    <div class="insight-recommendation">Monitor export policies for price changes</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schemes Page -->
+    <div class="page hidden" id="schemes-page">
+        <div class="container">
+            <h2 class="page-title">Government Schemes & Benefits</h2>
+            
+            <div class="schemes-dashboard">
+                <div class="schemes-filter">
+                    <select class="form-control" id="schemeStateFilter" onchange="filterSchemes()">
+                        <option value="all">All States</option>
+                        <option value="Odisha">Odisha</option>
+                        <option value="Maharashtra">Maharashtra</option>
+                        <option value="Punjab">Punjab</option>
+                        <option value="Gujarat">Gujarat</option>
+                    </select>
+                    <select class="form-control" id="schemeCategoryFilter" onchange="filterSchemes()">
+                        <option value="all">All Categories</option>
+                        <option value="income">Income Support</option>
+                        <option value="insurance">Insurance</option>
+                        <option value="subsidy">Subsidy</option>
+                        <option value="loan">Loan & Credit</option>
+                    </select>
+                </div>
+                
+                <div class="schemes-grid" id="schemesGrid">
+                    <!-- Schemes will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Community Page -->
+    <div class="page hidden" id="community-page">
+        <div class="container">
+            <h2 class="page-title">Farmer Community & Success Stories</h2>
+            
+            <div class="community-dashboard">
+                <div class="success-stories">
+                    <h3>Farmer Success Stories</h3>
+                    <div class="stories-grid" id="storiesGrid">
+                        <!-- Success stories will be populated here -->
+                    </div>
+                </div>
+                
+                <div class="soil-health-section">
+                    <h3>Soil Health Matrix</h3>
+                    <div class="soil-health-dashboard">
+                        <div class="soil-metrics-grid">
+                            <div class="soil-metric">
+                                <div class="metric-header">
+                                    <h4>pH Level</h4>
+                                    <div class="metric-gauge">
+                                        <div class="gauge-meter" id="phGauge">
+                                            <div class="gauge-fill" style="width: 62%"></div>
+                                        </div>
+                                        <div class="gauge-value">6.2</div>
+                                    </div>
+                                </div>
+                                <div class="metric-status slightly-acidic">Slightly Acidic</div>
+                                <div class="metric-recommendation">Add lime to increase pH</div>
+                            </div>
+                            
+                            <div class="soil-metric">
+                                <div class="metric-header">
+                                    <h4>Nitrogen</h4>
+                                    <div class="metric-gauge">
+                                        <div class="gauge-meter" id="nitrogenGauge">
+                                            <div class="gauge-fill" style="width: 45%"></div>
+                                        </div>
+                                        <div class="gauge-value">45mg/kg</div>
+                                    </div>
+                                </div>
+                                <div class="metric-status medium">Medium</div>
+                                <div class="metric-recommendation">Apply organic compost</div>
+                            </div>
+                            
+                            <div class="soil-metric">
+                                <div class="metric-header">
+                                    <h4>Phosphorus</h4>
+                                    <div class="metric-gauge">
+                                        <div class="gauge-meter" id="phosphorusGauge">
+                                            <div class="gauge-fill" style="width: 23%"></div>
+                                        </div>
+                                        <div class="gauge-value">23mg/kg</div>
+                                    </div>
+                                </div>
+                                <div class="metric-status low">Low</div>
+                                <div class="metric-recommendation">Use DAP fertilizer</div>
+                            </div>
+                            
+                            <div class="soil-metric">
+                                <div class="metric-header">
+                                    <h4>Potassium</h4>
+                                    <div class="metric-gauge">
+                                        <div class="gauge-meter" id="potassiumGauge">
+                                            <div class="gauge-fill" style="width: 78%"></div>
+                                        </div>
+                                        <div class="gauge-value">78mg/kg</div>
+                                    </div>
+                                </div>
+                                <div class="metric-status high">High</div>
+                                <div class="metric-recommendation">Reduce potassium fertilizers</div>
+                            </div>
+                            
+                            <div class="soil-metric">
+                                <div class="metric-header">
+                                    <h4>Organic Matter</h4>
+                                    <div class="metric-gauge">
+                                        <div class="gauge-meter" id="organicGauge">
+                                            <div class="gauge-fill" style="width: 70%"></div>
+                                        </div>
+                                        <div class="gauge-value">2.8%</div>
+                                    </div>
+                                </div>
+                                <div class="metric-status good">Good</div>
+                                <div class="metric-recommendation">Maintain current levels</div>
+                            </div>
+                            
+                            <div class="soil-metric">
+                                <div class="metric-header">
+                                    <h4>Moisture</h4>
+                                    <div class="metric-gauge">
+                                        <div class="gauge-meter" id="moistureGauge">
+                                            <div class="gauge-fill" style="width: 65%"></div>
+                                        </div>
+                                        <div class="gauge-value">65%</div>
+                                    </div>
+                                </div>
+                                <div class="metric-status optimal">Optimal</div>
+                                <div class="metric-recommendation">Continue current irrigation</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Multilingual Chatbot -->
+    <div class="chatbot-widget" id="chatbotWidget">
+        <div class="chatbot-header" onclick="toggleChatbot()">
+            <div class="chatbot-avatar">🤖</div>
+            <div class="chatbot-info">
+                <div class="chatbot-title" data-translate="chatbot.title">AI Assistant</div>
+                <div class="chatbot-status" data-translate="chatbot.online">Online</div>
+            </div>
+            <div class="chatbot-toggle">▼</div>
+        </div>
+        <div class="chatbot-body hidden" id="chatbotBody">
+            <div class="language-selector">
+                <select class="form-control" id="chatLanguageSelect" onchange="changeChatLanguage()">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी</option>
+                    <option value="or">ଓଡ଼ିଆ</option>
+                </select>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="message-content" id="botGreeting">
+                        Hello! I'm your AI farming assistant. How can I help you today?
+                    </div>
+                </div>
+            </div>
+            <div class="quick-questions">
+                <button class="quick-btn" onclick="askQuestion('crop disease')" data-translate="chatbot.disease">Disease Help</button>
+                <button class="quick-btn" onclick="askQuestion('irrigation')" data-translate="chatbot.irrigation">Irrigation</button>
+                <button class="quick-btn" onclick="askQuestion('fertilizer')" data-translate="chatbot.fertilizer">Fertilizer</button>
+                <button class="quick-btn" onclick="askQuestion('weather')" data-translate="chatbot.weather">Weather</button>
+            </div>
+            <div class="chat-input">
+                <input type="text" class="form-control" id="chatInput" placeholder="Type your message..." onkeypress="handleChatInput(event)">
+                <button class="btn btn--primary btn--sm" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Container -->
+    <div class="notifications-container" id="notificationsContainer"></div>
+
+    <script src="app.js"></script>
+</body>
 </html>
