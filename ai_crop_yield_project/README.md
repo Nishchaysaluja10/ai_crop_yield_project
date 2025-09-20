@@ -114,7 +114,7 @@ npm install
 Start development server:
 npm start
 
-Access at http://localhost:3000
+Access at https://cropai-nishchaysaluja13-3051-nishchays-projects-0ed4b325.vercel.app/?_vercel_share=3m8DCR3pPZkd72PPb97amWFd2syj53JO
 
 For production, follow build/deploy instructions in /docs.
 
