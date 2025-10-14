@@ -1,7 +1,7 @@
-// CropAI - Complete Agricultural Intelligence Platform
-// FIXED VERSION - All navigation and functionality issues resolved
+import React, { useState, useEffect, useRef } from 'react';
+import Chart from 'chart.js/auto';
+import './style.css';
 
-// Application Data with Complete Multilingual Support
 const appData = {
     languages: {
         en: {
@@ -238,243 +238,81 @@ const appData = {
     ]
 };
 
-// Application State
-let currentLanguage = 'en';
-let currentPage = 'hero';
-let chatbotOpen = false;
-let currentCity = 'Bhubaneswar';
+const Header = ({ showPage, currentLanguage, setCurrentLanguage, appData, currentPage }) => (
+    <header className="header">
+        <div className="logo" onClick={() => showPage('hero')}>
+            <span className="logo-icon">🌾</span>
+            <span className="logo-text">CropAI</span>
+        </div>
+        <nav className="nav-links">
+            {Object.entries(appData.languages[currentLanguage].nav).map(([key, value]) => (
+                <a
+                    href={`#${key}`}
+                    key={key}
+                    className={currentPage === key ? 'active' : ''}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        showPage(key);
+                    }}
+                >
+                    {value}
+                </a>
+            ))}
+        </nav>
+        <div className="header-actions">
+            <select
+                id="globalLanguageSelect"
+                className="language-select"
+                value={currentLanguage}
+                onChange={(e) => setCurrentLanguage(e.target.value)}
+            >
+                {Object.entries(appData.languages).map(([key, lang]) => (
+                    <option key={key} value={key}>
+                        {lang.name}
+                    </option>
+                ))}
+            </select>
+            <button className="mobile-nav-toggle" onClick={() => {}}>
+                <i className="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+);
 
-// Chart instances
-let regionalChart, weatherYieldChart, priceChart, weatherTrendChart;
+const Hero = ({ showPage, openChatbot }) => (
+    <div className="hero">
+        <div className="hero-content">
+            <h1 className="hero-title">
+                Welcome to <span className="highlight">CropAI</span>
+            </h1>
+            <p className="hero-subtitle">
+                AI-Powered Agricultural Intelligence for Modern Indian Farming
+            </p>
+            <div className="hero-buttons">
+                <button className="btn btn--primary" onClick={() => showPage('yield-prediction')}>
+                    Get Yield Prediction
+                </button>
+                <button className="btn btn--outline" onClick={openChatbot}>
+                    Ask AI Assistant
+                </button>
+            </div>
+        </div>
+    </div>
+);
 
-// Initialize Application - FIXED
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🌾 Initializing CropAI Agricultural Platform...');
-    
-    // Initialize all data first
-    initializeMarketData();
-    initializeSchemesData();
-    initializeFarmerStories();
-    
-    // Set up navigation system - FIXED
-    setupNavigation();
-    updateLanguageContent();
-    
-    // Initialize dashboard last
-    setTimeout(() => {
-        initializeDashboard();
-    }, 500);
-    
-    // Set up periodic updates
-    setInterval(updateDashboardMetrics, 30000);
-    setInterval(simulateMarketChanges, 45000);
-    
-    console.log('✅ CropAI Agricultural Platform initialized successfully!');
-});
+const Page = ({ id, currentPage, children }) => (
+    <div id={`${id}-page`} className={`page ${currentPage === id ? '' : 'hidden'}`}>
+        {children}
+    </div>
+);
 
-// Navigation Setup - COMPLETELY FIXED
-function setupNavigation() {
-    // Fix navigation links
-    document.querySelectorAll('.nav-links a[href^="#"]').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            const href = this.getAttribute('href');
-            if (href && href.startsWith('#')) {
-                const pageId = href.substring(1);
-                showPage(pageId);
-            }
-        });
-    });
-    
-    // Fix hero buttons
-    const yieldButton = document.querySelector('.hero-buttons .btn--primary');
-    const chatButton = document.querySelector('.hero-buttons .btn--outline');
-    
-    if (yieldButton) {
-        yieldButton.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            showPage('yield-prediction');
-        });
-    }
-    
-    if (chatButton) {
-        chatButton.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            openChatbot();
-        });
-    }
-}
+const Dashboard = () => {
+    const regionalCanvasRef = useRef(null);
 
-// Page Management - COMPLETELY FIXED
-function showPage(pageId) {
-    console.log(`🌾 Navigating to: ${pageId}`);
-    
-    // Hide hero section
-    const hero = document.querySelector('.hero');
-    if (hero) {
-        hero.style.display = 'none';
-    }
-    
-    // Hide all pages
-    document.querySelectorAll('.page').forEach(page => {
-        page.classList.add('hidden');
-        page.style.display = 'none';
-    });
-    
-    // Show selected page
-    const targetPage = document.getElementById(`${pageId}-page`);
-    if (targetPage) {
-        targetPage.classList.remove('hidden');
-        targetPage.style.display = 'block';
-        currentPage = pageId;
-        
-        // Update navigation active state
-        updateNavigation(pageId);
-        
-        // Load page-specific content
-        loadPageContent(pageId);
-        
-        // Update URL hash
-        window.location.hash = pageId;
-        
-        showNotification(`✅ Navigated to ${pageId.replace('-', ' ')} page`, 'success');
-    } else {
-        console.error(`❌ Page not found: ${pageId}-page`);
-        showNotification(`❌ Page not found: ${pageId}`, 'error');
-    }
-}
-
-function updateNavigation(activePageId) {
-    document.querySelectorAll('.nav-links a').forEach(link => {
-        link.classList.remove('active');
-        const href = link.getAttribute('href');
-        if (href === `#${activePageId}`) {
-            link.classList.add('active');
-        }
-    });
-}
-
-function loadPageContent(pageId) {
-    switch(pageId) {
-        case 'dashboard':
-            setTimeout(initializeDashboard, 100);
-            break;
-        case 'weather':
-            setTimeout(() => {
-                updateWeatherData();
-                initialize14DayForecast();
-            }, 100);
-            break;
-        case 'market':
-            setTimeout(updateMarketData, 100);
-            break;
-        case 'schemes':
-            setTimeout(filterSchemes, 100);
-            break;
-        case 'recommendations':
-            setTimeout(updateRecommendations, 100);
-            break;
-        case 'disease-detector':
-            showNotification('🔬 Disease detection ready - upload an image or try sample images', 'info');
-            break;
-        case 'community':
-            showNotification('👥 Community features loaded', 'info');
-            break;
-        default:
-            console.log(`Loading content for: ${pageId}`);
-    }
-}
-
-// Language Management - FIXED
-function changeGlobalLanguage() {
-    const select = document.getElementById('globalLanguageSelect');
-    if (select) {
-        currentLanguage = select.value;
-        const chatSelect = document.getElementById('chatLanguageSelect');
-        if (chatSelect) {
-            chatSelect.value = currentLanguage;
-        }
-        updateLanguageContent();
-        updateChatbotGreeting();
-        showNotification(`🌐 Language changed to ${appData.languages[currentLanguage].name}`, 'success');
-    }
-}
-
-function changeChatLanguage() {
-    const select = document.getElementById('chatLanguageSelect');
-    if (select) {
-        currentLanguage = select.value;
-        const globalSelect = document.getElementById('globalLanguageSelect');
-        if (globalSelect) {
-            globalSelect.value = currentLanguage;
-        }
-        updateLanguageContent();
-        updateChatbotGreeting();
-    }
-}
-
-function updateLanguageContent() {
-    const lang = appData.languages[currentLanguage];
-    
-    // Update navigation
-    document.querySelectorAll('[data-translate]').forEach(element => {
-        const key = element.getAttribute('data-translate');
-        const keys = key.split('.');
-        let value = lang;
-        
-        keys.forEach(k => {
-            if (value && value[k]) {
-                value = value[k];
-            }
-        });
-        
-        if (typeof value === 'string') {
-            element.textContent = value;
-        }
-    });
-}
-
-function updateChatbotGreeting() {
-    const greeting = appData.languages[currentLanguage].chatbot.greeting;
-    const greetingElement = document.getElementById('botGreeting');
-    if (greetingElement) {
-        greetingElement.textContent = greeting;
-    }
-}
-
-// Dashboard Functions - FIXED
-function initializeDashboard() {
-    updateDashboardMetrics();
-    setTimeout(initializeRegionalChart, 200);
-}
-
-function updateDashboardMetrics() {
-    const metrics = {
-        totalFarmers: Math.floor(45000 + Math.random() * 500),
-        avgYieldIncrease: (18.2 + Math.random() * 0.6).toFixed(1),
-        diseasesDetected: Math.floor(2800 + Math.random() * 100),
-        totalSavings: (24.5 + Math.random() * 0.5).toFixed(1)
-    };
-    
-    const totalFarmersEl = document.getElementById('totalFarmers');
-    const avgYieldEl = document.getElementById('avgYieldIncrease');
-    const diseasesEl = document.getElementById('diseasesDetected');
-    const savingsEl = document.getElementById('totalSavings');
-    
-    if (totalFarmersEl) totalFarmersEl.textContent = metrics.totalFarmers.toLocaleString();
-    if (avgYieldEl) avgYieldEl.textContent = `${metrics.avgYieldIncrease}%`;
-    if (diseasesEl) diseasesEl.textContent = metrics.diseasesDetected.toLocaleString();
-    if (savingsEl) savingsEl.textContent = `₹${metrics.totalSavings}L`;
-}
-
-function initializeRegionalChart() {
-    const ctx = document.getElementById('regionalYieldChart');
-    if (ctx && !regionalChart) {
-        try {
-            regionalChart = new Chart(ctx, {
+    useEffect(() => {
+        if (regionalCanvasRef.current) {
+            const ctx = regionalCanvasRef.current.getContext('2d');
+            const chart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: ['Odisha', 'West Bengal', 'Punjab', 'Tamil Nadu'],
@@ -515,155 +353,137 @@ function initializeRegionalChart() {
                     }
                 }
             });
-        } catch (error) {
-            console.error('Error initializing regional chart:', error);
+            return () => chart.destroy();
         }
-    }
-}
+    }, []);
 
-// Yield Prediction Functions - FIXED
-function calculateAdvancedYield() {
-    const btn = event.target.closest('button');
-    const spinner = btn.querySelector('.loading-spinner');
-    const btnText = btn.querySelector('.btn-text');
-    
-    // Show loading state
-    if (spinner) spinner.classList.remove('hidden');
-    if (btnText) btnText.textContent = 'Calculating AI Prediction...';
-    btn.disabled = true;
-    
-    // Get form values
-    const citySelect = document.getElementById('citySelect');
-    const cropSelect = document.getElementById('cropType');
-    const fieldSizeInput = document.getElementById('fieldSize');
-    const soilSelect = document.getElementById('soilType');
-    const irrigationSelect = document.getElementById('irrigationType');
-    const previousYieldInput = document.getElementById('previousYield');
-    
-    if (!citySelect || !cropSelect || !fieldSizeInput || !soilSelect || !irrigationSelect || !previousYieldInput) {
-        showNotification('❌ Form elements not found', 'error');
-        return;
-    }
-    
-    const city = citySelect.value;
-    const crop = cropSelect.value;
-    const fieldSize = parseFloat(fieldSizeInput.value);
-    const soilType = soilSelect.value;
-    const irrigation = irrigationSelect.value;
-    const previousYield = parseFloat(previousYieldInput.value);
-    
-    currentCity = city;
-    
-    // Simulate AI calculation
-    setTimeout(() => {
-        const prediction = calculateYieldPrediction(city, crop, fieldSize, soilType, irrigation, previousYield);
-        displayYieldResults(prediction);
+    return (
+        <section className="section-container">
+            <h2 className="section-title">Farmer Dashboard</h2>
+            <div className="metrics-grid">
+                <div className="metric-card">
+                    <div className="metric-value" id="totalFarmers">45,321</div>
+                    <div className="metric-label">Farmers Helped</div>
+                </div>
+                <div className="metric-card">
+                    <div className="metric-value" id="avgYieldIncrease">18.5%</div>
+                    <div className="metric-label">Avg. Yield Increase</div>
+                </div>
+                <div className="metric-card">
+                    <div className="metric-value" id="diseasesDetected">2,845</div>
+                    <div className="metric-label">Diseases Detected</div>
+                </div>
+                <div className="metric-card">
+                    <div className="metric-value" id="totalSavings">₹24.5L</div>
+                    <div className="metric-label">Input Costs Saved</div>
+                </div>
+            </div>
+            <div className="dashboard-charts">
+                <div className="chart-container">
+                    <h3 className="chart-title">Regional Yield Performance</h3>
+                    <canvas id="regionalYieldChart" ref={regionalCanvasRef}></canvas>
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const YieldPrediction = () => {
+    const [prediction, setPrediction] = useState(null);
+    const [calculating, setCalculating] = useState(false);
+    const weatherYieldCanvasRef = useRef(null);
+
+    const calculateYieldPrediction = (city, crop, fieldSize, soilType, irrigation, previousYield) => {
+        const baseYield = {
+            'Rice': 45,
+            'Wheat': 40,
+            'Maize': 55,
+            'Cotton': 18,
+            'Sugarcane': 750
+        };
         
-        // Reset button
-        if (spinner) spinner.classList.add('hidden');
-        if (btnText) btnText.textContent = 'Calculate AI Prediction';
-        btn.disabled = false;
+        const soilMultiplier = {
+            'Alluvial': 1.2,
+            'Black Cotton': 1.1,
+            'Red Laterite': 0.9,
+            'Sandy': 0.8,
+            'Clay': 1.0
+        };
         
-        showNotification(`🌾 Yield prediction completed for ${crop} in ${city}!`, 'success');
+        const irrigationMultiplier = {
+            'Drip': 1.3,
+            'Sprinkler': 1.2,
+            'Flood': 1.0,
+            'Rain-fed': 0.85
+        };
         
-        setTimeout(initializeWeatherYieldChart, 500);
-    }, 2500);
-}
+        const cityMultiplier = {
+            'Bhubaneswar': 1.1,
+            'Mumbai': 0.95,
+            'Delhi': 1.0,
+            'Chennai': 1.05,
+            'Kolkata': 1.08,
+            'Bangalore': 1.02,
+            'Hyderabad': 0.98,
+            'Pune': 1.03,
+            'Ahmedabad': 0.92
+        };
 
-function calculateYieldPrediction(city, crop, fieldSize, soilType, irrigation, previousYield) {
-    const baseYield = {
-        'Rice': 45,
-        'Wheat': 40, 
-        'Maize': 55,
-        'Cotton': 18,
-        'Sugarcane': 750
-    };
-    
-    const soilMultiplier = {
-        'Alluvial': 1.2,
-        'Black Cotton': 1.1,
-        'Red Laterite': 0.9,
-        'Sandy': 0.8,
-        'Clay': 1.0
-    };
-    
-    const irrigationMultiplier = {
-        'Drip': 1.3,
-        'Sprinkler': 1.2,
-        'Flood': 1.0,
-        'Rain-fed': 0.85
-    };
-    
-    const cityMultiplier = {
-        'Bhubaneswar': 1.1,
-        'Mumbai': 0.95,
-        'Delhi': 1.0,
-        'Chennai': 1.05,
-        'Kolkata': 1.08,
-        'Bangalore': 1.02,
-        'Hyderabad': 0.98,
-        'Pune': 1.03,
-        'Ahmedabad': 0.92
-    };
-    
-    let predictedYield = baseYield[crop] * 
-                        soilMultiplier[soilType] * 
-                        irrigationMultiplier[irrigation] * 
-                        (cityMultiplier[city] || 1.0) *
-                        fieldSize;
-    
-    predictedYield = predictedYield * (0.95 + Math.random() * 0.1);
-    
-    const currentPracticeYield = previousYield * fieldSize;
-    const productivityIncrease = ((predictedYield - currentPracticeYield) / currentPracticeYield * 100);
-    
-    const marketPrice = {
-        'Rice': 2850,
-        'Wheat': 2125,
-        'Maize': 1980,
-        'Cotton': 6500,
-        'Sugarcane': 350
-    };
-    
-    const revenue = Math.round(predictedYield * marketPrice[crop]);
-    const additionalIncome = Math.round((predictedYield - currentPracticeYield) * marketPrice[crop]);
-    
-    return {
-        yield: Math.round(predictedYield * 10) / 10,
-        fieldSize: fieldSize,
-        productivityIncrease: Math.round(productivityIncrease * 10) / 10,
-        revenue: revenue,
-        additionalIncome: Math.max(0, additionalIncome),
-        confidence: Math.round(88 + Math.random() * 8),
-        crop: crop,
-        city: city
-    };
-}
+        let predictedYield = baseYield[crop] *
+                            soilMultiplier[soilType] *
+                            irrigationMultiplier[irrigation] *
+                            (cityMultiplier[city] || 1.0) *
+                            fieldSize;
 
-function displayYieldResults(prediction) {
-    const yieldEl = document.getElementById('predictedYield');
-    const fieldSizeEl = document.getElementById('resultFieldSize');
-    const productivityEl = document.getElementById('productivityIncrease');
-    const revenueEl = document.getElementById('expectedRevenue');
-    const additionalEl = document.getElementById('additionalIncome');
-    const confidenceEl = document.getElementById('predictionConfidence');
-    const resultsDiv = document.getElementById('yieldResultsAdvanced');
-    
-    if (yieldEl) yieldEl.textContent = `${prediction.yield} quintals`;
-    if (fieldSizeEl) fieldSizeEl.textContent = prediction.fieldSize;
-    if (productivityEl) productivityEl.textContent = `+${prediction.productivityIncrease}%`;
-    if (revenueEl) revenueEl.textContent = `₹${prediction.revenue.toLocaleString()}`;
-    if (additionalEl) additionalEl.textContent = `₹${prediction.additionalIncome.toLocaleString()}`;
-    if (confidenceEl) confidenceEl.textContent = `${prediction.confidence}%`;
-    
-    if (resultsDiv) resultsDiv.classList.remove('hidden');
-}
+        predictedYield = predictedYield * (0.95 + Math.random() * 0.1);
 
-function initializeWeatherYieldChart() {
-    const ctx = document.getElementById('weatherYieldChart');
-    if (ctx && !weatherYieldChart) {
-        try {
-            weatherYieldChart = new Chart(ctx, {
+        const currentPracticeYield = previousYield * fieldSize;
+        const productivityIncrease = ((predictedYield - currentPracticeYield) / currentPracticeYield * 100);
+
+        const marketPrice = {
+            'Rice': 2850,
+            'Wheat': 2125,
+            'Maize': 1980,
+            'Cotton': 6500,
+            'Sugarcane': 350
+        };
+
+        const revenue = Math.round(predictedYield * marketPrice[crop]);
+        const additionalIncome = Math.round((predictedYield - currentPracticeYield) * marketPrice[crop]);
+
+        return {
+            yield: Math.round(predictedYield * 10) / 10,
+            fieldSize: fieldSize,
+            productivityIncrease: Math.round(productivityIncrease * 10) / 10,
+            revenue: revenue,
+            additionalIncome: Math.max(0, additionalIncome),
+            confidence: Math.round(88 + Math.random() * 8),
+            crop: crop,
+            city: city
+        };
+    };
+
+    const handleCalculate = (event) => {
+        setCalculating(true);
+        const form = event.target.closest('form');
+        const city = form.citySelect.value;
+        const crop = form.cropType.value;
+        const fieldSize = parseFloat(form.fieldSize.value);
+        const soilType = form.soilType.value;
+        const irrigation = form.irrigationType.value;
+        const previousYield = parseFloat(form.previousYield.value);
+
+        setTimeout(() => {
+            const result = calculateYieldPrediction(city, crop, fieldSize, soilType, irrigation, previousYield);
+            setPrediction(result);
+            setCalculating(false);
+        }, 2500);
+    };
+
+    useEffect(() => {
+        if (prediction && weatherYieldCanvasRef.current) {
+            const ctx = weatherYieldCanvasRef.current.getContext('2d');
+            const chart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: ['25°C', '28°C', '31°C', '34°C', '37°C'],
@@ -702,284 +522,191 @@ function initializeWeatherYieldChart() {
                     }
                 }
             });
-        } catch (error) {
-            console.error('Error initializing weather yield chart:', error);
+            return () => chart.destroy();
         }
-    }
-}
+    }, [prediction]);
 
-// Disease Detection Functions - FIXED
-function simulateImageUpload() {
-    showNotification('📷 Photo upload simulation - Click sample images below to try disease detection', 'info');
-}
-
-function analyzeSampleDisease(diseaseIndex) {
-    const disease = appData.diseases_database[diseaseIndex];
-    const resultsDiv = document.getElementById('detectionResults');
-    const progressDiv = document.getElementById('analysisProgress');
-    const diagnosisDiv = document.getElementById('diseaseDiagnosis');
-    
-    if (!resultsDiv || !progressDiv || !diagnosisDiv) {
-        showNotification('❌ Detection interface elements not found', 'error');
-        return;
-    }
-    
-    resultsDiv.classList.remove('hidden');
-    progressDiv.classList.remove('hidden');
-    diagnosisDiv.classList.add('hidden');
-    
-    let progress = 0;
-    const progressBar = document.getElementById('progressFill');
-    const statusText = document.getElementById('analysisStatus');
-    
-    const progressInterval = setInterval(() => {
-        progress += Math.random() * 15;
-        if (progress > 100) progress = 100;
-        
-        if (progressBar) progressBar.style.width = `${progress}%`;
-        
-        if (statusText) {
-            if (progress < 30) {
-                statusText.textContent = 'Loading image and preprocessing...';
-            } else if (progress < 60) {
-                statusText.textContent = 'Running deep learning analysis...';
-            } else if (progress < 90) {
-                statusText.textContent = 'Comparing with disease database...';
-            } else {
-                statusText.textContent = 'Finalizing diagnosis and recommendations...';
-            }
-        }
-        
-        if (progress >= 100) {
-            clearInterval(progressInterval);
-            
-            setTimeout(() => {
-                progressDiv.classList.add('hidden');
-                diagnosisDiv.classList.remove('hidden');
-                displayDiseaseResults(disease);
-                showNotification(`🔬 Disease analysis complete: ${disease.name} detected`, 'success');
-            }, 500);
-        }
-    }, 100);
-}
-
-function displayDiseaseResults(disease) {
-    const titleEl = document.getElementById('diseaseTitle');
-    const confidenceEl = document.getElementById('diseaseConfidenceScore');
-    const symptomsList = document.getElementById('symptomsIdentified');
-    const treatmentContainer = document.getElementById('treatmentSteps');
-    
-    if (titleEl) titleEl.textContent = disease.name;
-    if (confidenceEl) confidenceEl.textContent = disease.confidence;
-    
-    if (symptomsList) {
-        symptomsList.innerHTML = '';
-        disease.symptoms.forEach(symptom => {
-            const li = document.createElement('li');
-            li.textContent = symptom;
-            symptomsList.appendChild(li);
-        });
-    }
-    
-    if (treatmentContainer) {
-        treatmentContainer.innerHTML = '';
-        disease.treatment.forEach((treatment, index) => {
-            const priority = index === 0 ? 'immediate' : index === 1 ? 'short-term' : 'preventive';
-            const priorityText = index === 0 ? 'IMMEDIATE' : index === 1 ? 'THIS WEEK' : 'PREVENTION';
-            
-            const stepDiv = document.createElement('div');
-            stepDiv.className = `treatment-step ${priority}`;
-            stepDiv.innerHTML = `
-                <div class="step-priority">${priorityText}</div>
-                <div class="step-content">
-                    <h5>${treatment.split(' - ')[0] || treatment}</h5>
-                    <p>${treatment}</p>
+    return (
+        <section className="section-container">
+            <h2 className="section-title">AI-Powered Yield Prediction</h2>
+            <div className="prediction-container">
+                <div className="prediction-form-card">
+                    <h3>Enter Your Farm Details</h3>
+                    <form id="yieldPredictionForm">
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label htmlFor="citySelect">City/Region</label>
+                                <select id="citySelect" name="citySelect" defaultValue="Bhubaneswar">
+                                    <option value="Bhubaneswar">Bhubaneswar</option>
+                                    <option value="Mumbai">Mumbai</option>
+                                    <option value="Delhi">Delhi</option>
+                                    <option value="Chennai">Chennai</option>
+                                    <option value="Kolkata">Kolkata</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="cropType">Crop Type</label>
+                                <select id="cropType" name="cropType" defaultValue="Rice">
+                                    <option value="Rice">Rice</option>
+                                    <option value="Wheat">Wheat</option>
+                                    <option value="Maize">Maize</option>
+                                    <option value="Cotton">Cotton</option>
+                                    <option value="Sugarcane">Sugarcane</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="fieldSize">Field Size (acres)</label>
+                                <input type="number" id="fieldSize" name="fieldSize" defaultValue="5" />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="soilType">Soil Type</label>
+                                <select id="soilType" name="soilType" defaultValue="Alluvial">
+                                    <option value="Alluvial">Alluvial</option>
+                                    <option value="Black Cotton">Black Cotton</option>
+                                    <option value="Red Laterite">Red Laterite</option>
+                                    <option value="Sandy">Sandy</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="irrigationType">Irrigation</label>
+                                <select id="irrigationType" name="irrigationType" defaultValue="Drip">
+                                    <option value="Drip">Drip</option>
+                                    <option value="Sprinkler">Sprinkler</option>
+                                    <option value="Flood">Flood</option>
+                                    <option value="Rain-fed">Rain-fed</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="previousYield">Previous Yield (q/acre)</label>
+                                <input type="number" id="previousYield" name="previousYield" defaultValue="40" />
+                            </div>
+                        </div>
+                        <button type="button" className="btn btn--primary btn--full" onClick={handleCalculate} disabled={calculating}>
+                            {calculating ? 'Calculating...' : 'Calculate AI Prediction'}
+                        </button>
+                    </form>
                 </div>
-            `;
-            treatmentContainer.appendChild(stepDiv);
-        });
-    }
-}
-
-// Weather Functions - FIXED
-function updateWeatherData() {
-    const citySelect = document.getElementById('weatherCitySelect');
-    if (citySelect) {
-        currentCity = citySelect.value;
-    }
-    
-    const locationEl = document.getElementById('currentWeatherLocation');
-    if (locationEl) {
-        locationEl.textContent = `${currentCity}, India`;
-    }
-    
-    const baseTemp = 28;
-    const temp = baseTemp + Math.round((Math.random() - 0.5) * 4);
-    const humidity = Math.round(75 + (Math.random() - 0.5) * 10);
-    const wind = Math.round(12 + Math.random() * 8);
-    const rain = Math.round(Math.random() * 40);
-    const uv = Math.round(5 + Math.random() * 5);
-    
-    const humidityEl = document.getElementById('currentHumidity');
-    const windEl = document.getElementById('currentWind');
-    const rainEl = document.getElementById('currentRain');
-    const uvEl = document.getElementById('currentUV');
-    
-    if (humidityEl) humidityEl.textContent = `${humidity}%`;
-    if (windEl) windEl.textContent = `${wind} km/h`;
-    if (rainEl) rainEl.textContent = `${rain}%`;
-    if (uvEl) uvEl.textContent = uv;
-    
-    showNotification(`🌤️ Weather intelligence updated for ${currentCity}`, 'info');
-}
-
-function initialize14DayForecast() {
-    const forecastContainer = document.getElementById('forecast14Day');
-    if (!forecastContainer) return;
-    
-    const forecastData = appData.weather_14_days[currentCity] || appData.weather_14_days['Bhubaneswar'];
-    
-    forecastContainer.innerHTML = '';
-    
-    forecastData.forEach((day, index) => {
-        const dayCard = document.createElement('div');
-        dayCard.className = 'forecast-day-card';
-        
-        const date = new Date(day.date);
-        const dayName = index === 0 ? 'Today' : index === 1 ? 'Tomorrow' : 
-                       date.toLocaleDateString('en', {weekday: 'short'});
-        
-        dayCard.innerHTML = `
-            <div class="forecast-date">${dayName}</div>
-            <div class="forecast-icon-day">${day.icon}</div>
-            <div class="forecast-temps-day">
-                <span class="forecast-high">${day.high}</span>
-                <span class="forecast-low">${day.low}</span>
+                {prediction && (
+                    <div id="yieldResultsAdvanced" className="prediction-results-card">
+                        <h3>AI Prediction Results for {prediction.crop}</h3>
+                        <div className="results-grid">
+                            <div className="result-item">
+                                <div className="result-value">{prediction.yield} quintals</div>
+                                <div className="result-label">Predicted Yield</div>
+                            </div>
+                            <div className="result-item">
+                                <div className="result-value">{prediction.confidence}%</div>
+                                <div className="result-label">AI Confidence</div>
+                            </div>
+                            <div className="result-item">
+                                <div className="result-value" style={{color: 'green'}}>+{prediction.productivityIncrease}%</div>
+                                <div className="result-label">Productivity Increase</div>
+                            </div>
+                            <div className="result-item">
+                                <div className="result-value">₹{prediction.revenue.toLocaleString()}</div>
+                                <div className="result-label">Expected Revenue</div>
+                            </div>
+                        </div>
+                        <div className="chart-container" style={{marginTop: '20px'}}>
+                            <canvas ref={weatherYieldCanvasRef}></canvas>
+                        </div>
+                    </div>
+                )}
             </div>
-            <div class="forecast-rain">${day.rain} rain</div>
-            <div class="forecast-advice">${day.advice}</div>
-        `;
-        
-        forecastContainer.appendChild(dayCard);
-    });
-}
+        </section>
+    );
+};
 
-function showWeatherChart(type) {
-    document.querySelectorAll('.chart-tab-btn').forEach(btn => btn.classList.remove('active'));
-    if (event && event.target) {
-        event.target.classList.add('active');
-    }
-    
-    const ctx = document.getElementById('weatherTrendChart');
-    if (!ctx) return;
-    
-    if (weatherTrendChart) {
-        weatherTrendChart.destroy();
-    }
-    
-    let chartData, chartConfig = { type: 'line' };
-    
-    switch(type) {
-        case 'temperature':
-            chartData = {
-                labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
-                datasets: [{
-                    label: 'Temperature (°C)',
-                    data: [32, 30, 28, 31, 33, 34, 32],
-                    borderColor: '#B4413C',
-                    backgroundColor: 'rgba(180, 65, 60, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                }]
-            };
-            break;
-        case 'rainfall':
-            chartData = {
-                labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
-                datasets: [{
-                    label: 'Rainfall (mm)',
-                    data: [5, 15, 25, 8, 3, 2, 7],
-                    backgroundColor: '#1FB8CD',
-                    borderColor: '#1FB8CD',
-                    borderWidth: 1
-                }]
-            };
-            chartConfig = { type: 'bar' };
-            break;
-        case 'humidity':
-            chartData = {
-                labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
-                datasets: [{
-                    label: 'Humidity (%)',
-                    data: [78, 82, 85, 79, 75, 72, 76],
-                    borderColor: '#5D878F',
-                    backgroundColor: 'rgba(93, 135, 143, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                }]
-            };
-            break;
-    }
-    
-    try {
-        weatherTrendChart = new Chart(ctx, {
-            type: chartConfig.type,
-            data: chartData,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: type === 'rainfall',
-                        title: {
-                            display: true,
-                            text: type === 'temperature' ? 'Temperature (°C)' : 
-                                  type === 'rainfall' ? 'Rainfall (mm)' : 'Humidity (%)'
-                        }
-                    }
-                },
-                plugins: {
-                    title: {
-                        display: true,
-                        text: `${type.charAt(0).toUpperCase() + type.slice(1)} Trend - 7 Days`
-                    }
-                }
-            }
-        });
-    } catch (error) {
-        console.error('Error creating weather trend chart:', error);
-    }
-}
+const Recommendations = () => (
+    <section className="section-container">
+        <h2 className="section-title">Smart Recommendations</h2>
+    </section>
+);
 
-// Market Functions - FIXED  
-function initializeMarketData() {
-    updateMarketData();
-    setTimeout(initializePriceTrendChart, 200);
-}
+const DiseaseDetector = () => {
+    const [analyzing, setAnalyzing] = useState(false);
+    const [disease, setDisease] = useState(null);
 
-function updateMarketData() {
-    const priceGrid = document.getElementById('priceCardsGrid');
-    if (!priceGrid) return;
-    
-    priceGrid.innerHTML = '';
-    
-    appData.market_prices.forEach(item => {
-        const priceCard = document.createElement('div');
-        priceCard.className = 'price-card-market';
-        priceCard.innerHTML = `
-            <div class="crop-name-market">${item.crop}</div>
-            <div class="crop-price-market">${item.price}${item.unit}</div>
-            <div class="price-change-market ${item.trend}">${item.change}</div>
-        `;
-        priceGrid.appendChild(priceCard);
-    });
-}
+    const analyzeSampleDisease = (diseaseIndex) => {
+        setAnalyzing(true);
+        setDisease(null);
+        setTimeout(() => {
+            setDisease(appData.diseases_database[diseaseIndex]);
+            setAnalyzing(false);
+        }, 2000);
+    };
 
-function initializePriceTrendChart() {
-    const ctx = document.getElementById('pricesTrendChart');
-    if (ctx && !priceChart) {
-        try {
-            priceChart = new Chart(ctx, {
+    return (
+        <section className="section-container">
+            <h2 className="section-title">Crop Disease Detector</h2>
+            <div className="detection-container">
+                <div className="upload-card">
+                    <h3>Upload Crop Image</h3>
+                    <p>Upload a photo of the affected crop to get an instant AI-powered diagnosis.</p>
+                    <button className="btn btn--primary btn--full" onClick={() => {}}>
+                        Upload Photo
+                    </button>
+                    <div className="sample-images">
+                        <h4>Or try a sample image:</h4>
+                        <div className="sample-grid">
+                            <img src="https://i.imgur.com/fADb314.jpeg" alt="Blight" onClick={() => analyzeSampleDisease(0)} />
+                            <img src="https://i.imgur.com/fADb314.jpeg" alt="Rust" onClick={() => analyzeSampleDisease(1)} />
+                            <img src="https://i.imgur.com/fADb314.jpeg" alt="Healthy" onClick={() => analyzeSampleDisease(3)} />
+                        </div>
+                    </div>
+                </div>
+                <div id="detectionResults" className="results-card">
+                    <h3>Detection Results</h3>
+                    {analyzing && <div id="analysisProgress" className="progress-bar">Analyzing...</div>}
+                    {disease && (
+                        <div id="diseaseDiagnosis">
+                            <h4>{disease.name}</h4>
+                            <p><strong>Confidence:</strong> {disease.confidence}</p>
+                            <p><strong>Symptoms:</strong> {disease.symptoms.join(', ')}</p>
+                            <h5>Treatment Plan:</h5>
+                            <ul>
+                                {disease.treatment.map((step, i) => <li key={i}>{step}</li>)}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const Weather = () => {
+    const [city, setCity] = useState("Bhubaneswar");
+    const forecast = appData.weather_14_days[city] || appData.weather_14_days["Bhubaneswar"];
+
+    return (
+        <section className="section-container">
+            <h2 className="section-title">Weather Intelligence</h2>
+            <select value={city} onChange={e => setCity(e.target.value)}>
+                <option value="Bhubaneswar">Bhubaneswar</option>
+            </select>
+            <div className="forecast-container">
+                {forecast.map((day, i) => (
+                    <div className="forecast-day-card" key={i}>
+                        <div className="forecast-date">{day.date}</div>
+                        <div className="forecast-icon-day">{day.icon}</div>
+                        <div className="forecast-temps-day">{day.high} / {day.low}</div>
+                        <div className="forecast-rain">{day.rain} rain</div>
+                        <div className="forecast-advice">{day.advice}</div>
+                    </div>
+                ))}
+            </div>
+        </section>
+    );
+};
+
+const Market = () => {
+    const pricesTrendCanvasRef = useRef(null);
+
+    useEffect(() => {
+        if (pricesTrendCanvasRef.current) {
+            const ctx = pricesTrendCanvasRef.current.getContext('2d');
+            const chart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
@@ -988,392 +715,168 @@ function initializePriceTrendChart() {
                             label: 'Rice',
                             data: [2700, 2750, 2800, 2850],
                             borderColor: '#1FB8CD',
-                            backgroundColor: '#1FB8CD',
-                            tension: 0.4
                         },
                         {
                             label: 'Wheat',
                             data: [2200, 2180, 2150, 2125],
                             borderColor: '#FFC185',
-                            backgroundColor: '#FFC185',
-                            tension: 0.4
                         },
-                        {
-                            label: 'Maize',
-                            data: [1900, 1920, 1950, 1980],
-                            borderColor: '#B4413C',
-                            backgroundColor: '#B4413C',
-                            tension: 0.4
-                        }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            title: {
-                                display: true,
-                                text: 'Price (₹/quintal)'
-                            }
-                        }
-                    },
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Market Price Trends - Last 30 Days'
+                            text: 'Market Price Trends'
                         }
                     }
                 }
             });
-        } catch (error) {
-            console.error('Error initializing price trend chart:', error);
+            return () => chart.destroy();
         }
-    }
-}
+    }, []);
 
-function simulateMarketChanges() {
-    appData.market_prices.forEach(item => {
-        const change = (Math.random() - 0.5) * 1.5;
-        const currentPrice = parseFloat(item.price.replace(/[₹,]/g, ''));
-        const newPrice = Math.round(currentPrice * (1 + change / 100));
-        
-        item.price = `₹${newPrice.toLocaleString()}`;
-        item.change = `${change > 0 ? '+' : ''}${change.toFixed(1)}%`;
-        item.trend = change > 0 ? 'up' : 'down';
-    });
-    
-    if (currentPage === 'market') {
-        updateMarketData();
-    }
-}
-
-// Recommendations Functions - FIXED
-function updateRecommendations() {
-    const cropSelect = document.getElementById('recCropType');
-    const locationSelect = document.getElementById('recLocation'); 
-    const seasonSelect = document.getElementById('recSeason');
-    
-    const crop = cropSelect?.value || 'Rice';
-    const location = locationSelect?.value || 'Bhubaneswar';
-    const season = seasonSelect?.value || 'Kharif';
-    
-    showNotification(`🌾 Agricultural recommendations updated for ${crop} in ${location} during ${season} season`, 'success');
-}
-
-// Government Schemes Functions - FIXED
-function initializeSchemesData() {
-    filterSchemes();
-}
-
-function filterSchemes() {
-    const stateSelect = document.getElementById('schemeStateFilter');
-    const categorySelect = document.getElementById('schemeCategoryFilter');
-    
-    const stateFilter = stateSelect?.value || 'all';
-    const categoryFilter = categorySelect?.value || 'all';
-    
-    const filteredSchemes = appData.government_schemes.filter(scheme => {
-        const stateMatch = stateFilter === 'all' || scheme.state === 'all' || scheme.state === stateFilter;
-        const categoryMatch = categoryFilter === 'all' || scheme.category === categoryFilter;
-        return stateMatch && categoryMatch;
-    });
-    
-    displaySchemes(filteredSchemes);
-}
-
-function displaySchemes(schemes) {
-    const schemesGrid = document.getElementById('schemesGrid');
-    if (!schemesGrid) return;
-    
-    schemesGrid.innerHTML = '';
-    
-    schemes.forEach(scheme => {
-        const schemeCard = document.createElement('div');
-        schemeCard.className = 'scheme-card-detailed';
-        schemeCard.innerHTML = `
-            <div class="scheme-header-detailed">
-                <h3 class="scheme-title">${scheme.name}</h3>
-                <div class="scheme-amount-badge">${scheme.amount}</div>
+    return (
+        <section className="section-container">
+            <h2 className="section-title">Live Market Prices</h2>
+            <div className="price-grid">
+                {appData.market_prices.map((item, i) => (
+                    <div className="price-card-market" key={i}>
+                        <div className="crop-name-market">{item.crop}</div>
+                        <div className="crop-price-market">{item.price}{item.unit}</div>
+                        <div className={`price-change-market ${item.trend}`}>{item.change}</div>
+                    </div>
+                ))}
             </div>
-            <p class="scheme-description">${scheme.description}</p>
-            <div class="scheme-details">
-                <div class="scheme-detail-item">
-                    <div class="detail-label">Eligibility</div>
-                    <div class="detail-value">${scheme.eligibility}</div>
+            <div className="chart-container" style={{marginTop: '20px'}}>
+                <canvas ref={pricesTrendCanvasRef}></canvas>
+            </div>
+        </section>
+    );
+};
+
+const Schemes = () => (
+    <section className="section-container">
+        <h2 className="section-title">Government Schemes</h2>
+        <div className="schemes-grid">
+            {appData.government_schemes.map((scheme, i) => (
+                <div className="scheme-card-detailed" key={i}>
+                    <h3>{scheme.name}</h3>
+                    <p>{scheme.description}</p>
+                    <p><strong>Eligibility:</strong> {scheme.eligibility}</p>
                 </div>
-                <div class="scheme-detail-item">
-                    <div class="detail-label">Application</div>
-                    <div class="detail-value">${scheme.application}</div>
-                </div>
-                <div class="scheme-detail-item">
-                    <div class="detail-label">Category</div>
-                    <div class="detail-value">${scheme.category.charAt(0).toUpperCase() + scheme.category.slice(1)}</div>
-                </div>
-            </div>
-            <button class="btn btn--primary" onclick="applyForScheme('${scheme.name}')">
-                Apply Now
-            </button>
-        `;
-        schemesGrid.appendChild(schemeCard);
-    });
-    
-    showNotification(`📋 Found ${schemes.length} applicable agricultural schemes`, 'success');
-}
-
-function applyForScheme(schemeName) {
-    showNotification(`🚀 Redirecting to ${schemeName} application portal...`, 'info');
-}
-
-// Community Functions - FIXED
-function initializeFarmerStories() {
-    displayFarmerStories();
-}
-
-function displayFarmerStories() {
-    const storiesGrid = document.getElementById('storiesGrid');
-    if (!storiesGrid) return;
-    
-    storiesGrid.innerHTML = '';
-    
-    appData.farmer_stories.forEach(farmer => {
-        const storyCard = document.createElement('div');
-        storyCard.className = 'story-card';
-        storyCard.innerHTML = `
-            <div class="story-header">
-                <div class="farmer-avatar">${farmer.avatar}</div>
-                <div class="farmer-info">
-                    <h4>${farmer.name}</h4>
-                    <div class="farmer-location">${farmer.location} • ${farmer.crop}</div>
-                </div>
-            </div>
-            <div class="improvement-badge">${farmer.improvement}</div>
-            <div class="farmer-story">"${farmer.story}"</div>
-            <div style="margin-top: 12px; color: #6ba82f; font-weight: bold;">
-                Additional Income: ${farmer.income_increase}
-            </div>
-        `;
-        storiesGrid.appendChild(storyCard);
-    });
-}
-
-// Chatbot Functions - COMPLETELY FIXED
-function toggleChatbot() {
-    chatbotOpen = !chatbotOpen;
-    const body = document.getElementById('chatbotBody');
-    const toggle = document.querySelector('.chatbot-toggle');
-    
-    if (body && toggle) {
-        if (chatbotOpen) {
-            body.classList.remove('hidden');
-            toggle.classList.add('rotated');
-            showNotification('🤖 AI Agricultural Assistant activated! Ask me anything about farming.', 'info');
-        } else {
-            body.classList.add('hidden');
-            toggle.classList.remove('rotated');
-        }
-    }
-}
-
-function openChatbot() {
-    if (!chatbotOpen) {
-        toggleChatbot();
-    }
-}
-
-function askQuestion(topic) {
-    const responses = appData.languages[currentLanguage].chatbot.responses;
-    const response = responses[topic];
-    if (response) {
-        addChatMessage(`Tell me about ${topic}`, 'user');
-        setTimeout(() => {
-            addBotTypingIndicator();
-            setTimeout(() => {
-                removeBotTypingIndicator();
-                addChatMessage(response, 'bot');
-            }, 1500);
-        }, 500);
-    }
-}
-
-function addChatMessage(message, sender) {
-    const messagesDiv = document.getElementById('chatMessages');
-    if (!messagesDiv) return;
-    
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${sender}-message`;
-    messageDiv.innerHTML = `<div class="message-content">${message}</div>`;
-    
-    messagesDiv.appendChild(messageDiv);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
-
-function addBotTypingIndicator() {
-    const messagesDiv = document.getElementById('chatMessages');
-    if (!messagesDiv) return;
-    
-    const typingDiv = document.createElement('div');
-    typingDiv.className = 'message bot-message typing-indicator';
-    typingDiv.id = 'typingIndicator';
-    typingDiv.innerHTML = `
-        <div class="message-content">
-            <div class="typing-dots" style="display: flex; gap: 4px;">
-                <div class="typing-dot" style="width: 6px; height: 6px; background: #4a7c23; border-radius: 50%; animation: typingPulse 1.5s infinite ease-in-out;"></div>
-                <div class="typing-dot" style="width: 6px; height: 6px; background: #4a7c23; border-radius: 50%; animation: typingPulse 1.5s infinite ease-in-out; animation-delay: 0.2s;"></div>
-                <div class="typing-dot" style="width: 6px; height: 6px; background: #4a7c23; border-radius: 50%; animation: typingPulse 1.5s infinite ease-in-out; animation-delay: 0.4s;"></div>
-            </div>
+            ))}
         </div>
-    `;
-    messagesDiv.appendChild(typingDiv);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
+    </section>
+);
 
-function removeBotTypingIndicator() {
-    const typingIndicator = document.getElementById('typingIndicator');
-    if (typingIndicator) {
-        typingIndicator.remove();
-    }
-}
+const Community = () => (
+    <section className="section-container">
+        <h2 className="section-title">Farmer Community</h2>
+        <div className="stories-grid">
+            {appData.farmer_stories.map((story, i) => (
+                <div className="story-card" key={i}>
+                    <h4>{story.name}, {story.location}</h4>
+                    <p>"{story.story}"</p>
+                    <p><strong>Improvement:</strong> {story.improvement}</p>
+                </div>
+            ))}
+        </div>
+    </section>
+);
 
-function sendMessage() {
-    const input = document.getElementById('chatInput');
-    if (!input) return;
-    
-    const message = input.value.trim();
-    
-    if (message) {
-        addChatMessage(message, 'user');
-        input.value = '';
-        
+const Chatbot = ({ chatbotOpen, setChatbotOpen, currentLanguage, appData }) => (
+    <div className={`chatbot-container ${chatbotOpen ? 'open' : ''}`}>
+        <div className="chatbot-header">
+            <h3 data-translate="chatbot.title">{appData.languages[currentLanguage].chatbot.title}</h3>
+            <button className="chatbot-close" onClick={() => setChatbotOpen(false)}>
+                &times;
+            </button>
+        </div>
+        <div className="chatbot-body" id="chatbotBody">
+            <div className="message bot-message">{appData.languages[currentLanguage].chatbot.greeting}</div>
+        </div>
+        <div className="chatbot-input">
+            <input type="text" id="chatInput" placeholder="Ask a question..." />
+            <button id="sendMessage">Send</button>
+        </div>
+    </div>
+);
+
+const App = () => {
+    const [currentLanguage, setCurrentLanguage] = useState('en');
+    const [currentPage, setCurrentPage] = useState('hero');
+    const [chatbotOpen, setChatbotOpen] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+
+    const showNotification = (message, type = 'info') => {
+        const newNotification = { message, type, id: Date.now() };
+        setNotifications(prev => [...prev, newNotification]);
         setTimeout(() => {
-            addBotTypingIndicator();
-            setTimeout(() => {
-                removeBotTypingIndicator();
-                
-                let response = generateChatbotResponse(message);
-                addChatMessage(response, 'bot');
-            }, 1500);
-        }, 500);
-    }
-}
+            setNotifications(prev => prev.filter(n => n.id !== newNotification.id));
+        }, 4000);
+    };
 
-function generateChatbotResponse(message) {
-    const lowerMessage = message.toLowerCase();
-    const responses = appData.languages[currentLanguage].chatbot.responses;
-    
-    if (lowerMessage.includes('disease') || lowerMessage.includes('pest') || lowerMessage.includes('infection')) {
-        return responses['crop disease'];
-    } else if (lowerMessage.includes('water') || lowerMessage.includes('irrigation') || lowerMessage.includes('watering')) {
-        return responses['irrigation'];
-    } else if (lowerMessage.includes('fertilizer') || lowerMessage.includes('nutrient') || lowerMessage.includes('soil') || lowerMessage.includes('manure')) {
-        return responses['fertilizer'];
-    } else if (lowerMessage.includes('weather') || lowerMessage.includes('rain') || lowerMessage.includes('temperature')) {
-        return responses['weather'];
-    } else if (lowerMessage.includes('price') || lowerMessage.includes('market') || lowerMessage.includes('sell')) {
-        return currentLanguage === 'en' ? 
-               'Current market prices are showing positive trends. Rice is at ₹2,850/quintal with +5.2% increase. Check our Market section for detailed price analysis and agricultural market insights.' :
-               currentLanguage === 'hi' ?
-               'वर्तमान बाजार भाव सकारात्मक रुझान दिखा रहे हैं। धान ₹2,850/क्विंटल पर +5.2% की बढ़ोतरी के साथ है। विस्तृत मूल्य विश्लेषण के लिए हमारा बाजार सेक्शन देखें।' :
-               'ବର୍ତ୍ତମାନ ବଜାର ଦର ସକରାତ୍ମକ ଧାରା ଦେଖାଉଛି। ଧାନ +5.2% ବୃଦ୍ଧି ସହିତ ₹2,850/କ୍ୱିଣ୍ଟାଲରେ ରହିଛି। ବିସ୍ତୃତ ମୂଲ୍ୟ ବିଶ୍ଳେଷଣ ପାଇଁ ଆମର ବଜାର ବିଭାଗ ଦେଖନ୍ତୁ।';
-    } else if (lowerMessage.includes('scheme') || lowerMessage.includes('subsidy') || lowerMessage.includes('government') || lowerMessage.includes('योजना') || lowerMessage.includes('ଯୋଜନା')) {
-        return currentLanguage === 'en' ?
-               'There are several agricultural schemes available for farmers like PM-KISAN (₹6,000/year), Crop Insurance, and Soil Health Card. Check our Government Schemes section for eligibility and application details.' :
-               currentLanguage === 'hi' ?
-               'किसानों के लिए कई कृषि योजनाएं उपलब्ध हैं जैसे PM-KISAN (₹6,000/वर्ष), फसल बीमा, और मिट्टी स्वास्थ्य कार्ड। पात्रता और आवेदन विवरण के लिए हमारा सरकारी योजना सेक्शन देखें।' :
-               'କୃଷକଙ୍କ ପାଇଁ PM-KISAN (₹6,000/ବର୍ଷ), ଫସଲ ବୀମା, ଏବଂ ମାଟି ସ୍ୱାସ୍ଥ୍ୟ କାର୍ଡ ଭଳି ଅନେକ କୃଷି ଯୋଜନା ଉପଲବ୍ଧ। ଯୋଗ୍ୟତା ଏବଂ ଆବେଦନ ବିବରଣୀ ପାଇଁ ଆମର ସରକାରୀ ଯୋଜନା ବିଭାଗ ଦେଖନ୍ତୁ।';
-    } else {
-        return currentLanguage === 'en' ?
-               'I understand your agricultural question. I can help you with crop diseases, irrigation, fertilizers, weather forecasts, market prices, and government schemes. What specific farming information would you like?' :
-               currentLanguage === 'hi' ?
-               'मैं आपका कृषि सवाल समझता हूं। मैं फसल रोग, सिंचाई, उर्वरक, मौसम पूर्वानुमान, बाजार भाव और सरकारी योजनाओं में आपकी मदद कर सकता हूं। आप कौन सी विशिष्ट कृषि जानकारी चाहते हैं?' :
-               'ମୁଁ ଆପଣଙ୍କ କୃଷି ପ୍ରଶ୍ନ ବୁଝୁଛି। ମୁଁ ଫସଲ ରୋଗ, ଜଳସେଚନ, ସାର, ପାଣିପାଗ ପୂର୍ବାନୁମାନ, ବଜାର ଦର ଏବଂ ସରକାରୀ ଯୋଜନାରେ ସାହାୟ୍ୟ କରିପାରିବି। ଆପଣ କେଉଁ ନିର୍ଦ୍ଦିଷ୍ଟ କୃଷି ସୂଚନା ଚାହାଁନ୍ତି?';
-    }
-}
+    const showPage = (pageId) => {
+        setCurrentPage(pageId);
+        showNotification(`✅ Navigated to ${pageId.replace('-', ' ')} page`, 'success');
+    };
 
-function handleChatInput(event) {
-    if (event.key === 'Enter') {
-        sendMessage();
-    }
-}
-
-// Mobile Navigation
-function toggleMobileNav() {
-    showNotification('📱 Mobile agricultural navigation menu', 'info');
-}
-
-// Notification System - FIXED
-function showNotification(message, type = 'info') {
-    const container = document.getElementById('notificationsContainer');
-    if (!container) return;
+    const openChatbot = () => {
+        setChatbotOpen(true);
+        showNotification('🤖 AI Agricultural Assistant activated! Ask me anything about farming.', 'info');
+    };
     
-    const notification = document.createElement('div');
-    notification.className = `notification notification--${type}`;
-    notification.textContent = message;
-    
-    container.appendChild(notification);
-    
-    setTimeout(() => {
-        if (container.contains(notification)) {
-            notification.style.animation = 'notificationSlide 0.3s ease-in reverse';
-            setTimeout(() => {
-                if (container.contains(notification)) {
-                    container.removeChild(notification);
-                }
-            }, 300);
+    useEffect(() => {
+        const hash = window.location.hash.substring(1);
+        if (hash && Object.keys(appData.languages.en.nav).includes(hash)) {
+            setCurrentPage(hash);
+        } else {
+            setCurrentPage('hero');
         }
-    }, 4000);
-}
+    }, []);
 
-// Global function assignments for HTML onclick handlers
-window.showPage = showPage;
-window.changeGlobalLanguage = changeGlobalLanguage;
-window.changeChatLanguage = changeChatLanguage;
-window.calculateAdvancedYield = calculateAdvancedYield;
-window.analyzeSampleDisease = analyzeSampleDisease;
-window.updateWeatherData = updateWeatherData;
-window.updateRecommendations = updateRecommendations;
-window.filterSchemes = filterSchemes;
-window.showWeatherChart = showWeatherChart;
-window.toggleChatbot = toggleChatbot;
-window.openChatbot = openChatbot;
-window.askQuestion = askQuestion;
-window.sendMessage = sendMessage;
-window.handleChatInput = handleChatInput;
-window.applyForScheme = applyForScheme;
-window.simulateImageUpload = simulateImageUpload;
-window.toggleMobileNav = toggleMobileNav;
+    useEffect(() => {
+        window.location.hash = currentPage;
+    }, [currentPage]);
 
-// Handle browser navigation
-window.addEventListener('hashchange', function() {
-    const hash = window.location.hash.substring(1);
-    if (hash && document.getElementById(`${hash}-page`)) {
-        showPage(hash);
-    }
-});
+    return (
+        <div id="app-container">
+            <Header
+                showPage={showPage}
+                currentLanguage={currentLanguage}
+                setCurrentLanguage={setCurrentLanguage}
+                appData={appData}
+                currentPage={currentPage}
+            />
+            <main>
+                {currentPage === 'hero' && <Hero showPage={showPage} openChatbot={openChatbot} />}
+                <Page id="dashboard" currentPage={currentPage}><Dashboard /></Page>
+                <Page id="yield-prediction" currentPage={currentPage}><YieldPrediction /></Page>
+                <Page id="recommendations" currentPage={currentPage}><Recommendations /></Page>
+                <Page id="disease-detector" currentPage={currentPage}><DiseaseDetector /></Page>
+                <Page id="weather" currentPage={currentPage}><Weather /></Page>
+                <Page id="market" currentPage={currentPage}><Market /></Page>
+                <Page id="schemes" currentPage={currentPage}><Schemes /></Page>
+                <Page id="community" currentPage={currentPage}><Community /></Page>
+            </main>
+            <div id="notificationsContainer">
+                {notifications.map(n => (
+                    <div key={n.id} className={`notification notification--${n.type}`}>
+                        {n.message}
+                    </div>
+                ))}
+            </div>
+            <Chatbot
+                chatbotOpen={chatbotOpen}
+                setChatbotOpen={setChatbotOpen}
+                currentLanguage={currentLanguage}
+                appData={appData}
+            />
+        </div>
+    );
+};
 
-window.addEventListener('load', function() {
-    const hash = window.location.hash.substring(1);
-    if (hash && document.getElementById(`${hash}-page`)) {
-        showPage(hash);
-    } else {
-        currentPage = 'hero';
-    }
-});
-
-// Add CSS for typing animation
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes typingPulse {
-        0%, 60%, 100% { opacity: 0.3; }
-        30% { opacity: 1; }
-    }
-`;
-document.head.appendChild(style);
-
-console.log('🌾🚀 CropAI Agricultural Platform - FULLY FUNCTIONAL VERSION! 🚀🌾');
-console.log('✅ All navigation issues fixed');
-console.log('✅ Chatbot fully functional'); 
-console.log('✅ Beautiful agricultural green theme applied');
-console.log('✅ All interactive features working');
-console.log('🌱 Ready for comprehensive agricultural intelligence!');
+export default App;
